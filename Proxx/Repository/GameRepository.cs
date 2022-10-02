@@ -7,7 +7,7 @@ namespace Proxx.Manager
 {
     public class GameRepository : IGameRepository
     {
-        public IRandomMan RandomMan  { get; set; }
+        public IRandomMan RandomMan { get; set; }
         public GameRepository()
         {
             RandomMan = new RandomMan();
@@ -19,7 +19,7 @@ namespace Proxx.Manager
             var result = new HashSet<IdObject>();
 
             //this check helps to avoid infinity loop
-            var maxBlackHoles = rows * columns - 1;           
+            var maxBlackHoles = rows * columns - 1;
             if (maxBlackHoles < blackHoles)
             {
                 blackHoles = maxBlackHoles;
@@ -102,51 +102,24 @@ namespace Proxx.Manager
 
 
 
-        private List<IdObject> GetAdjacentCells(IdObject currentCell, BoardEntity board)
+        private List<IdObject> GetAdjacentCells(IdObject currentCellId, BoardEntity board)
         {
             List<IdObject> result = new List<IdObject>();
-            int? nextCol = currentCell.Column + 1 < board.Columns ? currentCell.Column + 1 : default(int?);
-            int? nextRow = currentCell.Row + 1 < board.Rows ? currentCell.Row + 1 : default(int?);
-            int? previousCol = currentCell.Column - 1 >= 0 ? currentCell.Column - 1 : default(int?);
-            int? previousRow = currentCell.Row - 1 >= 0 ? currentCell.Row - 1 : default(int?);
-            if (nextCol.HasValue)
-            {
-                result.Add(new IdObject(currentCell.Row, nextCol.Value));
-            }
-            if (previousCol.HasValue)
-            {
-                result.Add(new IdObject(currentCell.Row, previousCol.Value));
-            }
-            if (nextRow.HasValue)
-            {
-                result.Add(new IdObject(nextRow.Value, currentCell.Column));
-            }
-            if (previousRow.HasValue)
-            {
-                result.Add(new IdObject(previousRow.Value, currentCell.Column));
-            }
+            int startRow = currentCellId.Row > 0 ? currentCellId.Row - 1 : currentCellId.Row;
+            int startCol = currentCellId.Column > 0 ? currentCellId.Column - 1 : currentCellId.Column;
+            int nextCol = currentCellId.Column + 1;
+            int nexrRow = currentCellId.Row + 1;
 
-            if (previousRow.HasValue && nextCol.HasValue)
+            for (int row = startRow; row < board.Rows && row <= nexrRow; row++)
             {
-                var cellFirtsQuartile = new IdObject(previousRow.Value, nextCol.Value);
-                result.Add(cellFirtsQuartile);
-            }
-            if (previousRow.HasValue && previousCol.HasValue)
-            {
-                var cellSecondQuartile = new IdObject(previousRow.Value, previousCol.Value);
-                result.Add(cellSecondQuartile);
-            }
-
-            if (nextRow.HasValue && previousCol.HasValue)
-            {
-                var cellThirdQuartile = new IdObject(nextRow.Value, previousCol.Value);
-                result.Add(cellThirdQuartile);
-            }
-
-            if (nextRow.HasValue && nextCol.HasValue)
-            {
-                var cellFourthQuartile = new IdObject(nextRow.Value, nextCol.Value);
-                result.Add(cellFourthQuartile);
+                for (int col = startCol; col < board.Columns && col <= nextCol; col++)
+                {
+                    var cellId = new IdObject(row, col);
+                    if (cellId != currentCellId)
+                    {
+                        result.Add(cellId);
+                    }
+                }
             }
             return result;
 
